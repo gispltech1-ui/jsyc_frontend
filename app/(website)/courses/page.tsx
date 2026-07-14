@@ -68,7 +68,7 @@ export default function CoursesPage() {
     <main>
 
       {/* HERO */}
-      <section className="bg-gradient-to-r from-blue-900 via-blue-800 to-cyan-700 text-white">
+      <section className="bg-[#0B7B33] to-cyan-700 text-white">
         <div className="max-w-7xl mx-auto px-6 py-24 text-center">
 
           <h1 className="text-4xl font-bold">
@@ -104,7 +104,7 @@ export default function CoursesPage() {
                   key={course.title}
                   className="bg-slate-50 rounded-2xl p-6 text-center hover:shadow-lg transition"
                 >
-                  <Icon className="mx-auto w-10 h-10 text-blue-700" />
+                  <Icon className="mx-auto w-10 h-10 text-[#0B7B33]" />
 
                   <h3 className="mt-4 font-semibold">
                     {course.title}
@@ -148,7 +148,7 @@ export default function CoursesPage() {
                   <div
                     className={`w-16 h-16 rounded-2xl flex items-center justify-center ${course.color}`}
                   >
-                    <Icon className="w-8 h-8 text-blue-700" />
+                    <Icon className="w-8 h-8 text-[#0B7B33]" />
                   </div>
 
                   <h3 className="mt-6 text-2xl font-bold">
@@ -179,7 +179,7 @@ export default function CoursesPage() {
 
                   </div>
 
-                  <button className="w-full mt-8 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 transition">
+                  <button className="w-full mt-8 bg-[#0B7B33] text-white py-3 rounded-xl transition">
                     View Course
                   </button>
 
@@ -201,7 +201,7 @@ export default function CoursesPage() {
           <div className="grid md:grid-cols-4 gap-8 text-center">
 
             <div>
-              <h3 className="text-5xl font-bold text-blue-700">
+              <h3 className="text-5xl font-bold text-[#0B7B33]">
                 25K+
               </h3>
               <p className="mt-2 text-slate-500">
@@ -210,7 +210,7 @@ export default function CoursesPage() {
             </div>
 
             <div>
-              <h3 className="text-5xl font-bold text-blue-700">
+              <h3 className="text-5xl font-bold text-[#0B7B33]">
                 500+
               </h3>
               <p className="mt-2 text-slate-500">
@@ -219,7 +219,7 @@ export default function CoursesPage() {
             </div>
 
             <div>
-              <h3 className="text-5xl font-bold text-blue-700">
+              <h3 className="text-5xl font-bold text-[#0B7B33]">
                 50+
               </h3>
               <p className="mt-2 text-slate-500">
@@ -228,7 +228,7 @@ export default function CoursesPage() {
             </div>
 
             <div>
-              <h3 className="text-5xl font-bold text-blue-700">
+              <h3 className="text-5xl font-bold text-[#0B7B33]">
                 95%
               </h3>
               <p className="mt-2 text-slate-500">
@@ -243,7 +243,7 @@ export default function CoursesPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-gradient-to-r from-blue-800 to-cyan-700 py-20 text-white">
+      <section className="bg-[#0B7B33] py-20 text-white">
 
         <div className="max-w-4xl mx-auto text-center px-6">
 
@@ -256,7 +256,7 @@ export default function CoursesPage() {
             their future with JSYC.
           </p>
 
-          <button className="mt-8 bg-white text-blue-700 px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2">
+          <button className="mt-8 bg-white text-[#0B7B33] px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2">
             Enroll Now
             <ArrowRight size={20} />
           </button>

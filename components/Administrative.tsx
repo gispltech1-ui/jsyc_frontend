@@ -5,22 +5,22 @@ import { Phone, Mail } from "lucide-react";
 
 const administrators = [
   {
-    name: "Shri.Kumar Gaurav",
-    designation: "Chairman",
+    name: "Shri. Ved Ratna Mohan",
+    designation: "Joint secretary -cum-Member Secretary",
     description:
       "Hon'ble Chairman",
-    image: "/profile.png",
+    image: "/image2.jpeg",
     phone: "+91 ********65",
     email: "xy@gmail.com",
   },
   {
-    name: "Shri.Ved Ratna Mohan",
-    designation: "Administrative Joint secretary -cum-Member Secretary",
-    description:
-      "Hon'ble Administrative Joint secretary",
-    image: "/profile.png",
-    phone: "+91 ********65",
-    email: "xy@gmail.com",
+    name: "Shri. Hemant Soren",
+    designation: "Hon'ble Chief Minister of Jharkhand",
+    // description:
+    //   "Hon'ble Administrative Joint secretary",
+    image: "/images.jpg",
+    // phone: "+91 ********65",
+    // email: "xy@gmail.com",
   },
 ];
 
@@ -30,7 +30,7 @@ export default function Administratives() {
       <div className="max-w-8xl mx-auto px-6">
 
         {/* Heading */}
-          <h2 className="text-center text-4xl font-semibold text-black mb-7">
+          <h2 className="text-center text-4xl  font-semibold text-black mb-15">
           Administratives
         </h2>
 
@@ -79,15 +79,15 @@ export default function Administratives() {
                   py-3
                 "
               >
-                <h4 className="text-[#0b6b35] text-[14px] font-semibold">
+                <h4 className="text-[#0b6b35] text-[15px] mt-6 font-semibold">
                   {item.designation}
                 </h4>
 
-                <p className="text-[10px] text-gray-600 leading-4 mt-2">
+                {/* <p className="text-[10px] text-gray-600 leading-4 mt-2">
                   {item.description}
-                </p>
+                </p> */}
 
-                <div className="flex items-center gap-4 mt-4 text-[10px] text-gray-500">
+                {/* <div className="flex items-center gap-4 mt-4 text-[10px] text-gray-500">
 
                   <div className="flex items-center gap-1">
                     <Phone size={10} />
@@ -99,7 +99,7 @@ export default function Administratives() {
                     {item.email}
                   </div>
 
-                </div>
+                </div> */}
               </div>
 
               {/* Profile Image */}

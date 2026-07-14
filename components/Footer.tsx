@@ -151,11 +151,9 @@ export default function Footer() {
         Head Office
       </p>
       <p className="leading-6">
-        JSYC Platform,
-        <br />
-        Ranchi, Jharkhand,
-        <br />
-        India - 834001
+       Jharkhand State Youth Commission, Ranchi,
+ Engineering Hostel Building, Ground Floor, Sec. -3,
+ Golchakkar, H.E.C., Dhurwa, Ranchi.
       </p>
     </div>
 
@@ -171,15 +169,15 @@ export default function Footer() {
       <p className="text-white font-medium mb-1">
         Email
       </p>
-      <p>info@jsyc.in</p>
-      <p>support@jsyc.in</p>
+      <p>jsyc.rnc@gmail.com</p>
+      {/* <p>support@jsyc.in</p> */}
     </div>
 
     <div>
       <p className="text-white font-medium mb-1">
         Working Hours
       </p>
-      <p>Mon - Sat : 9:00 AM - 6:00 PM</p>
+      <p>Mon - Fri : 10:00 AM - 6:00 PM</p>
     </div>
 
   </div>

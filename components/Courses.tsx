@@ -96,10 +96,10 @@ export default function Courses() {
                   {course.description}
                 </p>
 
-                <button className="mt-8 w-full bg-slate-100 hover:bg-blue-50 rounded-xl py-4 flex items-center justify-center gap-3 font-semibold text-slate-800 group-hover:text-blue-700 transition">
-                  Learn More
+                <Link href="/courses" className="mt-8 w-full bg-slate-100 hover:bg-blue-50 rounded-xl py-4 flex items-center justify-center gap-3 font-semibold text-slate-800 group-hover:text-blue-700 transition">
+                  Learn More 
                   <ArrowRight className="w-5 h-5" />
-                </button>
+                </Link>
               </div>
             );
           })}

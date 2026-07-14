@@ -123,8 +123,8 @@ export default function Hero() {
   const slides = ["/Home11.png", "/Home12.png", "/Home13.png", "/Home14.png"];
 
   return (
-   <section className="bg-[#e8dfc7] px-4">
-  <div className="mx-auto">
+   <section className="bg-[#e8dfc7] px-4 ">
+  <div className="">
     <Swiper
       modules={[Autoplay, Pagination]}
       loop
@@ -140,9 +140,9 @@ export default function Hero() {
             <Image
               src={image}
               alt=""
-              width={1800}
-              height={200}
-              className="rounded-lg shadow"
+              width={1000}
+              height={100}
+              className="rounded-lg shadow w-full h-[30vh] lg:h-[70vh] object-center"
             />
           </div>
         </SwiperSlide>

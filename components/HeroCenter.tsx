@@ -206,10 +206,11 @@ export default function HeroCentersSection() {
               </p>
 
               {/* CTA */}
-              <button className="mt-8 flex items-center gap-2 text-emerald-700 font-semibold group-hover:gap-4 transition-all duration-300">
+              <Link
+            href="/centers" className="mt-8 flex items-center gap-2 text-emerald-700 font-semibold group-hover:gap-4 transition-all duration-300">
                 View Details
                 <ArrowRight className="w-4 h-4" />
-              </button>
+              </Link>
 
               {/* Hover Background Accent */}
               <div className="absolute -right-10 -bottom-10 w-28 h-28 bg-emerald-50 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-500" />

@@ -70,7 +70,7 @@ export default function ContactPage() {
                 Working Hours
               </h3>
               <p className="mt-2 text-slate-500">
-                Mon - Sat, 9 AM - 6 PM
+                Mon - Fri, 10 AM - 6 PM
               </p>
             </div>
 
