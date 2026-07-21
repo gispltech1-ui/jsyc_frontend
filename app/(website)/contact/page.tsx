@@ -40,7 +40,7 @@ export default function ContactPage() {
                 Call Us
               </h3>
               <p className="mt-2 text-slate-500">
-                +91 98765 43210
+                +91 98765 *****
               </p>
             </div>
 

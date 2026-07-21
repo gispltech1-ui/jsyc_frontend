@@ -397,7 +397,7 @@ export default function AboutPage() {
                           className="h-8 flex items-center justify-center relative"
                         >
                           {active ? (
-                            <div className="w-9 h-9 rounded-full bg-[#7e57c2] text-white flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-full bg-green-700 text-white flex items-center justify-center">
                               {day}
                             </div>
                           ) : (

@@ -161,8 +161,7 @@ export default function Footer() {
       <p className="text-white font-medium mb-1">
         Phone
       </p>
-      <p>+91 98765 43210</p>
-      <p>+91 91234 56789</p>
+      <p>+91 98765 *****</p>
     </div>
 
     <div>

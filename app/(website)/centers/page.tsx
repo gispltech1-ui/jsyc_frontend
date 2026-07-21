@@ -217,7 +217,7 @@ export default function CentersPage() {
 
             <div className="flex items-center gap-2">
               <Phone size={18} />
-              +91 98765 43210
+              +91 98765 *****
             </div>
 
             <div className="flex items-center gap-2">

@@ -120,7 +120,7 @@ export default function AboutPage() {
                     <button
                       key={index}
                       className={`w-full text-sm text-left px-4 py-3 rounded-lg font-medium transition ${index === 0
-                          ? "bg-sky-500 text-white"
+                          ? "bg-green-700 text-white"
                           : "hover:bg-slate-50 text-slate-700"
                         }`}
                     >
@@ -149,7 +149,7 @@ export default function AboutPage() {
                   className="w-full h-12 px-4 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-500 mb-4"
                 />
 
-                <button className="w-full h-12 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-semibold transition">
+                <button className="w-full h-12 rounded-lg bg-green-700 hover:bg-green-800 text-white font-semibold transition">
                   Subscribe
                 </button>
 
@@ -322,7 +322,7 @@ export default function AboutPage() {
                           className="h-8 flex items-center justify-center relative"
                         >
                           {active ? (
-                            <div className="w-9 h-9 rounded-full bg-[#7e57c2] text-white flex items-center justify-center">
+                            <div className="w-9 h-9 rounded-full bg-green-700 text-white flex items-center justify-center">
                               {day}
                             </div>
                           ) : (
