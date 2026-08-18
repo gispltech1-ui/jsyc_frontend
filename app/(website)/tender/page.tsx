@@ -1,52 +1,101 @@
+"use client";
+
 import {
   FileText,
   Calendar,
   Download,
   Clock,
   Building2,
-  Search,
   ArrowRight,
   Phone,
   Mail,
 } from "lucide-react";
 
-const tenders = [
-  {
-    id: "JSYC/TEN/2026/001",
-    title: "Supply of Computer Systems",
-    category: "IT Infrastructure",
-    closingDate: "15 Jun 2026",
-    status: "Open",
-  },
-  {
-    id: "JSYC/TEN/2026/002",
-    title: "Training Center Renovation",
-    category: "Civil Works",
-    closingDate: "22 Jun 2026",
-    status: "Open",
-  },
-  {
-    id: "JSYC/TEN/2026/003",
-    title: "Digital Learning Platform Enhancement",
-    category: "Software Services",
-    closingDate: "30 Jun 2026",
-    status: "Open",
-  },
-  {
-    id: "JSYC/TEN/2026/004",
-    title: "Furniture Procurement",
-    category: "Office Infrastructure",
-    closingDate: "05 Jul 2026",
-    status: "Open",
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function TenderPage() {
+  const [tenders, setTenders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTenders = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/admin/tender`
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          setTenders(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch tenders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTenders();
+  }, []);
+
+  // Active tenders
+  const activeTenders = tenders.filter((tender) => {
+    if (!tender.closingDate) return true;
+
+    return new Date(tender.closingDate) >= new Date();
+  });
+
+  // Closing within next 7 days
+  const closingSoon = tenders.filter((tender) => {
+    if (!tender.closingDate) return false;
+
+    const today = new Date();
+    const closing = new Date(tender.closingDate);
+
+    const diff =
+      closing.getTime() - today.getTime();
+
+    const days =
+      diff / (1000 * 60 * 60 * 24);
+
+    return days >= 0 && days <= 7;
+  });
+
+  const formatDate = (date: string) => {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+  const getPdfUrl = (pdfUrl: string) => {
+    if (!pdfUrl) return "#";
+
+    // If backend already returns full URL
+    if (pdfUrl.startsWith("http")) {
+      return pdfUrl;
+    }
+
+    // Convert uploads/xxx.pdf into API URL
+    return `${process.env.NEXT_PUBLIC_IMAGE_URL}/${pdfUrl.replace(
+      /\\/g,
+      "/"
+    )}`;
+  };
+
   return (
     <main>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#005F2F] to-cyan-700 text-white">
+      {/* ================= HERO ================= */}
+
+      <section className="relative overflow-hidden bg-[#005F2F] text-white">
 
         <div className="absolute inset-0 opacity-10">
           <div
@@ -65,7 +114,7 @@ export default function TenderPage() {
             Government Procurement Portal
           </span>
 
-          <h1 className="mt-6 text-4xl  font-bold">
+          <h1 className="mt-6 text-4xl font-bold">
             Tenders & Procurement
           </h1>
 
@@ -79,52 +128,76 @@ export default function TenderPage() {
 
       </section>
 
-  
-      {/* Stats */}
+
+      {/* ================= STATS ================= */}
+
       <section className="py-20 bg-slate-50">
 
         <div className="max-w-7xl mx-auto px-6">
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 
+            {/* Active */}
             <div className="bg-white rounded-3xl p-8 text-center shadow-sm hover:shadow-lg transition">
+
               <FileText className="w-12 h-12 mx-auto text-blue-700" />
+
               <h3 className="mt-4 text-3xl font-bold">
-                35
+                {activeTenders.length}
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Active Tenders
               </p>
+
             </div>
 
+
+            {/* Departments */}
             <div className="bg-white rounded-3xl p-8 text-center shadow-sm hover:shadow-lg transition">
+
               <Building2 className="w-12 h-12 mx-auto text-green-600" />
+
               <h3 className="mt-4 text-3xl font-bold">
-                12
+                JSYC
               </h3>
+
               <p className="mt-2 text-slate-500">
-                Departments
+                Procurement Department
               </p>
+
             </div>
 
+
+            {/* Closing Soon */}
             <div className="bg-white rounded-3xl p-8 text-center shadow-sm hover:shadow-lg transition">
+
               <Calendar className="w-12 h-12 mx-auto text-orange-500" />
+
               <h3 className="mt-4 text-3xl font-bold">
-                8
+                {closingSoon.length}
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Closing Soon
               </p>
+
             </div>
 
+
+            {/* Online */}
             <div className="bg-white rounded-3xl p-8 text-center shadow-sm hover:shadow-lg transition">
+
               <Clock className="w-12 h-12 mx-auto text-purple-600" />
+
               <h3 className="mt-4 text-3xl font-bold">
                 24x7
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Online Access
               </p>
+
             </div>
 
           </div>
@@ -133,7 +206,9 @@ export default function TenderPage() {
 
       </section>
 
-      {/* Active Tenders */}
+
+      {/* ================= ACTIVE TENDERS ================= */}
+
       <section className="py-24 bg-white">
 
         <div className="max-w-7xl mx-auto px-6">
@@ -150,87 +225,173 @@ export default function TenderPage() {
 
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm">
 
-            <table className="w-full">
+          {loading ? (
 
-              <thead className="bg-slate-50">
-                <tr>
-                  <th className="text-left p-5 font-semibold">
-                    Tender ID
-                  </th>
+            <div className="text-center py-20">
+              <p className="text-slate-500">
+                Loading tenders...
+              </p>
+            </div>
 
-                  <th className="text-left p-5 font-semibold">
-                    Tender Title
-                  </th>
+          ) : activeTenders.length === 0 ? (
 
-                  <th className="text-left p-5 font-semibold">
-                    Category
-                  </th>
+            <div className="text-center py-20 border rounded-3xl">
+              <FileText
+                className="mx-auto text-slate-300"
+                size={50}
+              />
 
-                  <th className="text-left p-5 font-semibold">
-                    Closing Date
-                  </th>
+              <p className="mt-4 text-slate-500">
+                No active tenders available.
+              </p>
+            </div>
 
-                  <th className="text-left p-5 font-semibold">
-                    Status
-                  </th>
+          ) : (
 
-                  <th className="text-left p-5 font-semibold">
-                    Action
-                  </th>
-                </tr>
-              </thead>
+            <div className="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm">
 
-              <tbody>
+              <table className="w-full">
 
-                {tenders.map((tender) => (
-                  <tr
-                    key={tender.id}
-                    className="border-t hover:bg-slate-50"
-                  >
-                    <td className="p-5 font-medium">
-                      {tender.id}
-                    </td>
+                <thead className="bg-slate-50">
 
-                    <td className="p-5">
-                      {tender.title}
-                    </td>
+                  <tr>
 
-                    <td className="p-5">
-                      {tender.category}
-                    </td>
+                    <th className="text-left p-5 font-semibold">
+                      Tender ID
+                    </th>
 
-                    <td className="p-5">
-                      {tender.closingDate}
-                    </td>
+                    <th className="text-left p-5 font-semibold">
+                      Tender Title
+                    </th>
 
-                    <td className="p-5">
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
-                        {tender.status}
-                      </span>
-                    </td>
+                    <th className="text-left p-5 font-semibold">
+                      Description
+                    </th>
 
-                    <td className="p-5">
-                      <button className="flex items-center gap-2 text-[#005F2F] font-semibold">
-                        <Download size={16} />
-                        Download
-                      </button>
-                    </td>
+                    <th className="text-left p-5 font-semibold">
+                      Closing Date
+                    </th>
+
+                    <th className="text-left p-5 font-semibold">
+                      Status
+                    </th>
+
+                    <th className="text-left p-5 font-semibold">
+                      Action
+                    </th>
+
                   </tr>
-                ))}
 
-              </tbody>
+                </thead>
 
-            </table>
 
-          </div>
+                <tbody>
+
+                  {activeTenders.map((tender) => (
+
+                    <tr
+                      key={tender.id}
+                      className="border-t hover:bg-slate-50"
+                    >
+
+                      {/* Tender Number */}
+
+                      <td className="p-5 font-medium">
+
+                        {tender.tenderNo ||
+                          tender.id}
+
+                      </td>
+
+
+                      {/* Title */}
+
+                      <td className="p-5">
+
+                        <p className="font-medium">
+                          {tender.title}
+                        </p>
+
+                      </td>
+
+
+                      {/* Description */}
+
+                      <td className="p-5">
+
+                        <p className="text-sm text-slate-500 max-w-xs">
+                          {tender.description ||
+                            "-"}
+                        </p>
+
+                      </td>
+
+
+                      {/* Closing Date */}
+
+                      <td className="p-5">
+
+                        {formatDate(
+                          tender.closingDate
+                        )}
+
+                      </td>
+
+
+                      {/* Status */}
+
+                      <td className="p-5">
+
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+
+                          Open
+
+                        </span>
+
+                      </td>
+
+
+                      {/* PDF */}
+
+                      <td className="p-5">
+
+                        <a
+                          href={getPdfUrl(
+                            tender.pdfUrl
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-[#005F2F] font-semibold hover:underline"
+                        >
+
+                          <Download size={16} />
+
+                          Download
+
+                        </a>
+
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
 
         </div>
 
       </section>
 
-      {/* Submission Process */}
+
+      {/* ================= SUBMISSION PROCESS ================= */}
+
       <section className="py-24 bg-slate-50">
 
         <div className="max-w-7xl mx-auto px-6">
@@ -247,6 +408,7 @@ export default function TenderPage() {
 
           </div>
 
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
 
             {[
@@ -255,18 +417,24 @@ export default function TenderPage() {
               "Submit Bid Proposal",
               "Evaluation & Award",
             ].map((step, index) => (
+
               <div
                 key={step}
                 className="bg-white rounded-3xl p-8 text-center shadow-sm"
               >
+
                 <div className="w-14 h-14 mx-auto rounded-full bg-[#005F2F] text-white flex items-center justify-center font-bold text-xl">
+
                   {index + 1}
+
                 </div>
 
                 <h3 className="mt-5 text-lg font-semibold">
                   {step}
                 </h3>
+
               </div>
+
             ))}
 
           </div>
@@ -275,7 +443,9 @@ export default function TenderPage() {
 
       </section>
 
-      {/* CTA */}
+
+      {/* ================= CTA ================= */}
+
       <section className="bg-[#005F2F] text-white py-20">
 
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -305,8 +475,11 @@ export default function TenderPage() {
           </div>
 
           <button className="mt-10 bg-white text-blue-700 px-8 py-4 rounded-xl font-semibold inline-flex items-center gap-2 hover:scale-105 transition">
+
             Contact Procurement Team
+
             <ArrowRight size={18} />
+
           </button>
 
         </div>

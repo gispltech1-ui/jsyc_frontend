@@ -4,6 +4,15 @@ import Image from "next/image";
 import { Phone, Mail } from "lucide-react";
 
 const administrators = [
+   {
+    name: "Shri. Hemant Soren",
+    designation: "Hon'ble Chief Minister of Jharkhand",
+    // description:
+    //   "Hon'ble Administrative Joint secretary",
+    image: "/images.jpg",
+    // phone: "+91 ********65",
+    // email: "xy@gmail.com",
+  },
   {
     name: "Shri. Ved Ratna Mohan",
     designation: "Joint secretary -cum-Member Secretary",
@@ -13,15 +22,7 @@ const administrators = [
     phone: "+91 ********65",
     email: "xy@gmail.com",
   },
-  {
-    name: "Shri. Hemant Soren",
-    designation: "Hon'ble Chief Minister of Jharkhand",
-    // description:
-    //   "Hon'ble Administrative Joint secretary",
-    image: "/images.jpg",
-    // phone: "+91 ********65",
-    // email: "xy@gmail.com",
-  },
+ 
 ];
 
 export default function Administratives() {
@@ -71,23 +72,7 @@ export default function Administratives() {
                 {item.designation}
               </h4>
 
-              {/*
-              <p className="text-sm text-gray-600 mt-3">
-                {item.description}
-              </p>
 
-              <div className="mt-4 flex flex-col gap-2 text-sm text-gray-500">
-                <div className="flex justify-center items-center gap-2">
-                  <Phone size={16} />
-                  {item.phone}
-                </div>
-
-                <div className="flex justify-center items-center gap-2">
-                  <Mail size={16} />
-                  {item.email}
-                </div>
-              </div>
-              */}
             </div>
 
           </div>

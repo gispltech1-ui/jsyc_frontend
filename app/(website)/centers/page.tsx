@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Building2,
   MapPin,
@@ -10,30 +12,34 @@ import {
   Monitor,
 } from "lucide-react";
 
-const centers = [
-  {
-    name: "Ranchi Center",
-    location: "Ranchi, Jharkhand",
-    students: "8500+",
-  },
-  {
-    name: "Jamshedpur Center",
-    location: "Jamshedpur, Jharkhand",
-    students: "6200+",
-  },
-  {
-    name: "Dhanbad Center",
-    location: "Dhanbad, Jharkhand",
-    students: "5800+",
-  },
-  {
-    name: "Bokaro Center",
-    location: "Bokaro, Jharkhand",
-    students: "4500+",
-  },
-];
+import { useEffect, useState } from "react";
 
 export default function CentersPage() {
+  const [centers, setCenters] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCenters = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/admin/center`
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          setCenters(data.data || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch centers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCenters();
+  }, []);
+
   return (
     <main>
 
@@ -53,6 +59,7 @@ export default function CentersPage() {
         </div>
       </section>
 
+
       {/* Stats */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
@@ -61,8 +68,9 @@ export default function CentersPage() {
 
             <div>
               <h3 className="text-5xl font-bold text-[#007a2f]">
-                50+
+                {centers.length}+
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Centers
               </p>
@@ -72,6 +80,7 @@ export default function CentersPage() {
               <h3 className="text-5xl font-bold text-[#007a2f]">
                 25K+
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Students
               </p>
@@ -81,6 +90,7 @@ export default function CentersPage() {
               <h3 className="text-5xl font-bold text-[#007a2f]">
                 500+
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Teachers
               </p>
@@ -90,6 +100,7 @@ export default function CentersPage() {
               <h3 className="text-5xl font-bold text-[#007a2f]">
                 95%
               </h3>
+
               <p className="mt-2 text-slate-500">
                 Success Rate
               </p>
@@ -100,12 +111,14 @@ export default function CentersPage() {
         </div>
       </section>
 
-      {/* Centers Grid */}
+
+      {/* Centers */}
       <section className="py-24 bg-slate-50">
 
         <div className="max-w-7xl mx-auto px-6">
 
           <div className="text-center">
+
             <h2 className="text-3xl font-bold">
               Featured Centers
             </h2>
@@ -113,52 +126,93 @@ export default function CentersPage() {
             <p className="mt-4 text-slate-500 text-xl">
               Explore our education hubs
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-14">
-
-            {centers.map((center) => (
-              <div
-                key={center.name}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition"
-              >
-
-                {/* Image Placeholder */}
-                <div className="h-48 bg-gradient-to-r from-[#007a2f] to-[#6cd092] flex items-center justify-center">
-                  <Building2 className="w-20 h-20 text-white" />
-                </div>
-
-                <div className="p-6">
-
-                  <h3 className="text-xl font-bold">
-                    {center.name}
-                  </h3>
-
-                  <div className="flex items-center gap-2 mt-3 text-slate-500">
-                    <MapPin className="w-4 h-4" />
-                    {center.location}
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-3 text-slate-500">
-                    <Users className="w-4 h-4" />
-                    {center.students} Students
-                  </div>
-
-                  <button className="mt-6 flex items-center gap-2 text-[#007a2f] font-semibold">
-                    View Center
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-
-                </div>
-
-              </div>
-            ))}
 
           </div>
+
+
+          {loading ? (
+
+            <div className="text-center py-20 text-slate-500">
+              Loading centers...
+            </div>
+
+          ) : centers.length === 0 ? (
+
+            <div className="text-center py-20 text-slate-500">
+              No learning centers available.
+            </div>
+
+          ) : (
+
+            <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-8 mt-14">
+
+              {centers.map((center) => (
+
+                <div
+                  key={center.id}
+                  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition"
+                >
+
+                  {/* Image Placeholder */}
+                  <div className="h-48 bg-gradient-to-r from-[#007a2f] to-[#6cd092] flex items-center justify-center">
+
+                    <Building2 className="w-20 h-20 text-white" />
+
+                  </div>
+
+
+                  <div className="p-6">
+
+                    <h3 className="text-xl font-bold">
+                      {center.name}
+                    </h3>
+
+
+                    <div className="flex items-center gap-2 mt-3 text-slate-500">
+
+                      <MapPin className="w-4 h-4" />
+
+                      <span>
+                        {center.district}, Jharkhand
+                      </span>
+
+                    </div>
+
+
+                    <div className="flex items-center gap-2 mt-3 text-slate-500">
+
+                      <Users className="w-4 h-4" />
+
+                      <span>
+                        {center.enrollments?.length || 0} Students
+                      </span>
+
+                    </div>
+
+
+                    {/* <button
+                      className="mt-6 flex items-center gap-2 text-[#007a2f] font-semibold"
+                    >
+                      View Center
+
+                      <ArrowRight className="w-4 h-4" />
+
+                    </button> */}
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          )}
 
         </div>
 
       </section>
+
 
       {/* Facilities */}
       <section className="py-24 bg-white">
@@ -166,32 +220,46 @@ export default function CentersPage() {
         <div className="max-w-7xl mx-auto px-6">
 
           <div className="text-center">
+
             <h2 className="text-3xl font-bold">
               Facilities & Infrastructure
             </h2>
+
           </div>
+
 
           <div className="grid md:grid-cols-3 gap-8 mt-14">
 
             <div className="bg-slate-50 rounded-3xl p-8 text-center">
+
               <Monitor className="w-14 h-14 text-[#007a2f] mx-auto" />
+
               <h3 className="mt-5 text-xl font-bold">
                 Smart Classrooms
               </h3>
+
             </div>
 
+
             <div className="bg-slate-50 rounded-3xl p-8 text-center">
+
               <Wifi className="w-14 h-14 text-[#007a2f] mx-auto" />
+
               <h3 className="mt-5 text-xl font-bold">
                 High-Speed Internet
               </h3>
+
             </div>
 
+
             <div className="bg-slate-50 rounded-3xl p-8 text-center">
+
               <BookOpen className="w-14 h-14 text-[#007a2f] mx-auto" />
+
               <h3 className="mt-5 text-xl font-bold">
                 Digital Library
               </h3>
+
             </div>
 
           </div>
@@ -199,6 +267,7 @@ export default function CentersPage() {
         </div>
 
       </section>
+
 
       {/* Contact CTA */}
       <section className="bg-[#005F2F] text-white py-20">
@@ -212,6 +281,7 @@ export default function CentersPage() {
           <p className="mt-5 text-md text-blue-100">
             Connect with us and begin your learning journey.
           </p>
+
 
           <div className="flex flex-wrap justify-center gap-6 mt-8">
 

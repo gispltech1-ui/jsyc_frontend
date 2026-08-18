@@ -1,3 +1,4 @@
+"use client"
 import {
   BookOpen,
   Building2,
@@ -5,6 +6,7 @@ import {
   CheckCircle2,
   Users,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const subjects = [
   {
@@ -43,34 +45,112 @@ const sessions = [
 ];
 
 export default function TeacherDashboard() {
+  const [teacher, setTeacher] = useState<any>(null);
+
+  useEffect(() => {
+  const user = localStorage.getItem("user");
+
+  if (!user) return;
+
+  const parsedUser = JSON.parse(user);
+
+  fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/teacher/${parsedUser.id}`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.success) {
+        setTeacher(data.data);
+      }
+    })
+    .catch(console.error);
+
+}, []);
+
+if (!teacher) {
+  return (
+    <div className="flex justify-center items-center h-[70vh]">
+      Loading...
+    </div>
+  );
+}
   return (
     <div className="bg-slate-50 min-h-screen">
       <div className="mx-auto max-w-7xl space-y-5">
+        <div className="rounded-2xl bg-white border border-slate-200 p-6">
+
+  <div className="flex items-center gap-5">
+
+      
+      <div className="w-20 h-20 rounded-full bg-blue-700 text-white flex items-center justify-center text-2xl font-bold">
+        {teacher?.fullName
+          ?.split(" ")
+          .map((x: string) => x[0])
+          .join("")
+          .substring(0, 2)}
+      </div>
+    
+
+    <div>
+
+      <h1 className="text-2xl font-bold">
+        {teacher?.fullName}
+      </h1>
+
+      <p className="text-slate-500">
+        {teacher?.highestQualification}
+      </p>
+
+      <p className="text-sm text-slate-400 mt-1">
+        {teacher?.user?.email}
+      </p>
+
+      <p className="text-sm text-slate-400">
+        +91 {teacher?.user?.mobileNumber}
+      </p>
+
+    </div>
+
+  </div>
+
+</div>
         {/* Stats */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard
             title="Status"
-            value="Active"
-            valueClass="text-green-600"
+value={
+  teacher.payments?.[0]?.status === "SUCCESS"
+    ? "Active"
+    : "Pending"
+}            valueClass="text-green-600"
             icon={<CheckCircle2 className="h-8 w-8 text-green-600" />}
           />
 
           <StatCard
             title="Total Students"
-            value="156"
+value="--"
             icon={<Users className="h-8 w-8 text-blue-700" />}
           />
 
           <StatCard
             title="Subjects"
-            value="3"
-            icon={<BookOpen className="h-8 w-8 text-teal-600" />}
+value={
+  teacher.subjectsCanTeach
+    ? teacher.subjectsCanTeach.split(",").length.toString()
+    : "0"
+}            icon={<BookOpen className="h-8 w-8 text-teal-600" />}
           />
 
           <StatCard
             title="Centers"
-            value="2"
-            icon={<Building2 className="h-8 w-8 text-amber-600" />}
+value={
+  [
+    teacher.preferredCenter1,
+    teacher.preferredCenter2,
+  ]
+    .filter(Boolean)
+    .length.toString()
+}            icon={<Building2 className="h-8 w-8 text-amber-600" />}
           />
         </div>
 
@@ -83,26 +163,31 @@ export default function TeacherDashboard() {
             </h2>
 
             <div className="space-y-3">
-              {subjects.map((subject) => (
-                <div
-                  key={subject.name}
-                  className="flex items-center justify-between rounded-xl bg-slate-50 p-4 transition-all hover:bg-slate-100"
-                >
-                  <div>
-                    <h3 className="text-base font-medium text-slate-900">
-                      {subject.name}
-                    </h3>
+              {teacher.subjectsCanTeach
+  ?.split(",")
+  .map((subject: string, index: number) => (
+    <div
+      key={index}
+      className="flex items-center justify-between rounded-xl bg-slate-50 p-4 hover:bg-slate-100"
+    >
+      <div>
 
-                    <p className="mt-1 text-xs text-slate-500">
-                      {subject.center}
-                    </p>
-                  </div>
+        <h3 className="text-base font-medium">
+          {subject.trim()}
+        </h3>
 
-                  <span className="rounded-lg bg-teal-600 px-3 py-1 text-xs font-medium text-white">
-                    {subject.students} Students
-                  </span>
-                </div>
-              ))}
+        <p className="mt-1 text-xs text-slate-500">
+          {teacher.preferredCenter1}
+        </p>
+
+      </div>
+
+      <span className="rounded-lg bg-teal-600 px-3 py-1 text-xs font-medium text-white">
+        Assigned
+      </span>
+
+    </div>
+))}
             </div>
           </div>
 
@@ -112,34 +197,22 @@ export default function TeacherDashboard() {
               Upcoming Sessions
             </h2>
 
-            <div className="space-y-3">
-              {sessions.map((session) => (
-                <div
-                  key={session.subject}
-                  className="flex items-center justify-between rounded-xl bg-slate-50 p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-lg bg-teal-50 p-2">
-                      <CalendarDays className="h-5 w-5 text-teal-600" />
-                    </div>
+            <div className="rounded-xl bg-slate-50 p-6 text-center">
 
-                    <div>
-                      <h3 className="text-base font-medium text-slate-900">
-                        {session.subject}
-                      </h3>
+  <CalendarDays
+    className="mx-auto text-slate-400"
+    size={40}
+  />
 
-                      <p className="text-xs text-slate-500">
-                        {session.center}
-                      </p>
-                    </div>
-                  </div>
+  <h3 className="mt-3 font-semibold">
+    No Sessions Scheduled
+  </h3>
 
-                  <span className="text-sm font-medium text-teal-600">
-                    {session.time}
-                  </span>
-                </div>
-              ))}
-            </div>
+  <p className="text-sm text-slate-500 mt-1">
+    Upcoming classes will appear here.
+  </p>
+
+</div>
           </div>
         </div>
       </div>

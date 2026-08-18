@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { CheckCircle, Save, Upload, FileText, ImageIcon, CreditCard, Wallet, Landmark, BadgeIndianRupee, GraduationCap } from "lucide-react";
 
 const steps = [
-  "Mobile Verification","Personal Details","Academic Details",
-  "Enrollment Details","Document Upload","Review Details","Payment","Confirmation"
+  "Mobile Verification", "Personal Details", "Academic Details",
+  "Enrollment Details", "Document Upload", "Review Details", "Payment", "Confirmation"
 ];
 
 const inputCls = "w-full h-12 border border-slate-300 rounded-md px-4 text-sm focus:ring-2 focus:ring-blue-600 focus:border-transparent focus:outline-none bg-white text-slate-700 placeholder:text-slate-400";
@@ -15,7 +15,7 @@ const labelCls = "block text-sm font-semibold text-slate-700 mb-2";
 function Field({ label, children, span2 = false }: { label: string; children: React.ReactNode; span2?: boolean }) {
   return (
     <div className={span2 ? "col-span-2" : ""}>
-      <label className={labelCls}>{label}</label>
+      <label className={labelCls}>{label} <span className="text-red-500">*</span></label>
       {children}
     </div>
   );
@@ -54,28 +54,212 @@ export default function StudentRegistrationPage() {
     photo: null as File | null, signature: null as File | null,
     aadhaar: null as File | null, certificate: null as File | null,
     declarationAccepted: false,
-    paymentMethod: "", transactionId: "", amount: 5500,
+    paymentMethod: "", transactionId: "", amount: 100,
   });
 
+  const [masterData, setMasterData] = useState({
+    courses: [],
+    subjects: [],
+    centers: [],
+  });
   const update = (key: string, value: unknown) => setFormData(prev => ({ ...prev, [key]: value }));
   const enrollmentId = "JSYC" + Date.now();
   const progress = Math.round((currentStep / steps.length) * 100);
 
+  useEffect(() => {
+    const fetchMasterData = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/global`
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          setMasterData(data.data);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchMasterData();
+  }, []);
+
   const submitRegistration = async () => {
     try {
       const payload = new FormData();
-      payload.append("studentData", JSON.stringify({ ...formData, enrollmentId }));
-      if (formData.photo) payload.append("photo", formData.photo);
-      if (formData.signature) payload.append("signature", formData.signature);
-      if (formData.aadhaar) payload.append("aadhaar", formData.aadhaar);
-      if (formData.certificate) payload.append("certificate", formData.certificate);
-      const res = await fetch("/api/student/register", { method: "POST", body: payload });
+
+      // Basic Details
+      payload.append("mobile", formData.mobile);
+      payload.append("otp", formData.otp);
+
+      // Personal Details
+      payload.append("firstName", formData.firstName);
+      payload.append("fatherName", formData.fatherName);
+      payload.append("motherName", formData.motherName);
+
+      payload.append("gender", formData.gender);
+      payload.append("dob", formData.dob);
+
+      payload.append("email", formData.email);
+      payload.append("address", formData.address);
+      payload.append("district", formData.district);
+
+      // Academic Details
+      payload.append(
+        "academicQualification",
+        formData.academicQualification
+      );
+
+      payload.append(
+        "schoolCollegeName",
+        formData.schoolCollegeName
+      );
+
+      payload.append(
+        "passingYear",
+        formData.passingYear
+      );
+
+      payload.append(
+        "category",
+        formData.category
+      );
+
+      payload.append(
+        "experience",
+        formData.experience
+      );
+
+      // Enrollment
+      payload.append("courseId", formData.courseId);
+      payload.append("subjectId", formData.subjectId);
+      payload.append("centerId", formData.centerId);
+      payload.append("batchId", formData.batchId);
+
+      payload.append(
+        "learningMode",
+        formData.learningMode
+      );
+
+      payload.append(
+        "preferredTiming",
+        formData.preferredTiming
+      );
+
+      // Payment
+      payload.append(
+        "paymentMethod",
+        formData.paymentMethod || "PAYU"
+      );
+
+      payload.append(
+        "declarationAccepted",
+        String(formData.declarationAccepted)
+      );
+
+      // Files
+      if (formData.photo) {
+        payload.append("photo", formData.photo);
+      }
+
+      if (formData.signature) {
+        payload.append("signature", formData.signature);
+      }
+
+      if (formData.aadhaar) {
+        payload.append("aadhaar", formData.aadhaar);
+      }
+
+      if (formData.certificate) {
+        payload.append("certificate", formData.certificate);
+      }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/student/register`,
+        {
+          method: "POST",
+          body: payload,
+        }
+      );
+
       const data = await res.json();
-      if (data.success) localStorage.removeItem("student-registration");
-    } catch (err) { console.error(err); }
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Registration failed");
+        return;
+      }
+
+      update("transactionId", data.data.transactionId);
+
+      await initiatePayment(data.data.transactionId);
+
+    } catch (error) {
+      console.error(error);
+      alert("Registration failed");
+    }
   };
 
-  useEffect(() => { if (currentStep === 8) submitRegistration(); }, [currentStep]);
+  const initiatePayment = async (transactionId: string) => {
+    try {
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            transactionId,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (!result.success) {
+        alert(result.message);
+        return;
+      }
+
+      submitToPayU(result.data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+
+  const submitToPayU = (payuData: any) => {
+
+    const form = document.createElement("form");
+
+    form.method = "POST";
+    form.action = process.env.NEXT_PUBLIC_PAYU_URL!;
+
+    // form.action = "https://test.payu.in/_payment";
+
+    Object.entries(payuData).forEach(([key, value]) => {
+
+      const input = document.createElement("input");
+
+      input.type = "hidden";
+
+      input.name = key;
+
+      input.value = String(value);
+
+      form.appendChild(input);
+
+    });
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("student-registration");
@@ -84,25 +268,24 @@ export default function StudentRegistrationPage() {
         const draft = JSON.parse(saved);
         setCurrentStep(draft.currentStep || 1);
         setFormData(prev => ({ ...prev, ...(draft.formData || {}) }));
-      } catch {}
+      } catch { }
     }
   }, []);
 
   const nextStep = () => {
     if (currentStep === 1) {
       if (!formData.mobile.trim()) return alert("Enter mobile number");
-      if (!formData.otp.trim()) return alert("Enter OTP");
+      // if (!formData.otp.trim()) return alert("Enter OTP");
     }
     if (currentStep === 6 && !formData.declarationAccepted) return alert("Please accept the declaration");
     setCurrentStep(p => Math.min(p + 1, steps.length));
   };
   const prevStep = () => setCurrentStep(p => Math.max(p - 1, 1));
-  const saveDraft = () => { localStorage.setItem("student-registration", JSON.stringify({ currentStep, formData })); alert("Draft saved"); };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-cyan-50">
 
-     
+
 
       {/* Page title */}
       <div className="max-w-5xl mx-auto px-6 pt-8 pb-2">
@@ -114,10 +297,10 @@ export default function StudentRegistrationPage() {
       <div className="max-w-5xl mx-auto px-6 py-5">
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-semibold text-slate-700">Step {currentStep} of {steps.length}</span>
-          <span className="bg-teal-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md">{progress}% Complete</span>
+          <span className="bg-green-700 text-white text-xs font-semibold px-3 py-1.5 rounded-md">{progress}% Complete</span>
         </div>
         <div className="h-2 bg-slate-200 rounded-full overflow-hidden mb-6">
-          <div className="h-full bg-gradient-to-r from-blue-700 to-teal-500 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+          <div className="h-full bg-gradient-to-r from-green-900 to-green-500 rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
         <div className="hidden md:flex justify-between">
           {steps.map((step, i) => {
@@ -125,11 +308,11 @@ export default function StudentRegistrationPage() {
             return (
               <div key={step} className="flex flex-col items-center gap-2">
                 <div className={`w-11 h-11 rounded-full flex items-center justify-center text-sm font-semibold border-2 transition-all
-                  ${done ? "bg-teal-600 border-teal-600 text-white" : active ? "bg-blue-700 border-blue-700 text-white" : "bg-white border-slate-300 text-slate-400"}`}>
+                  ${done ? "bg-green-700 border-teal-600 text-white" : active ? "bg-green-700 border-green-700 text-white" : "bg-white border-slate-300 text-slate-400"}`}>
                   {done ? <CheckCircle size={16} /> : n}
                 </div>
                 <span className={`text-xs text-center max-w-[72px] leading-tight font-medium
-                  ${active ? "text-blue-700" : done ? "text-teal-700" : "text-slate-400"}`}>{step}</span>
+                  ${active ? "text-green-700" : done ? "text-teal-700" : "text-slate-600"}`}>{step}</span>
               </div>
             );
           })}
@@ -147,46 +330,190 @@ export default function StudentRegistrationPage() {
                 <h2 className="text-xl font-bold text-slate-900 mb-6">Mobile Verification</h2>
                 <div className=" grid gap-5">
                   <Field label="Mobile Number">
-                    <input type="tel" className={inputCls} placeholder="+91 XXXXXXXXXX"
-                      value={formData.mobile} onChange={e => update("mobile", e.target.value)} />
+                    <input
+                      type="tel"
+                      className={inputCls}
+                      placeholder="Enter Mobile No"
+                      value={formData.mobile}
+                      maxLength={10}
+                      pattern="[0-9]{10}"
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, "");
+
+                        if (value.length <= 10) {
+                          update("mobile", value);
+                        }
+                      }}
+                    />
                   </Field>
                   <div>
-                    <button className="h-12 px-8 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-md transition">
+                    {/* <button className="h-12 px-8 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm rounded-md transition">
                       Send OTP
-                    </button>
+                    </button> */}
                   </div>
-                  <Field label="Enter OTP">
+                  {/* <Field label="Enter OTP">
                     <input type="text" className={inputCls} placeholder="Enter 6-digit OTP"
                       value={formData.otp} onChange={e => update("otp", e.target.value)} />
-                  </Field>
+                  </Field> */}
                 </div>
               </div>
             )}
 
             {/* Step 2 */}
+
+
             {currentStep === 2 && (
               <div>
-                <h2 className="text-xl font-bold text-slate-900 mb-6">Personal Details</h2>
+                <h2 className="text-xl font-bold text-slate-900 mb-6">
+                  Personal Details
+                </h2>
+
                 <div className="grid grid-cols-2 gap-5">
-                  <Field label="Full Name *"><input type="text" className={inputCls} placeholder="Enter full name" value={formData.firstName} onChange={e => update("firstName", e.target.value)} /></Field>
-                  <Field label="Father's Name *"><input type="text" className={inputCls} placeholder="Father's name" value={formData.fatherName} onChange={e => update("fatherName", e.target.value)} /></Field>
-                  <Field label="Mother's Name *"><input type="text" className={inputCls} placeholder="Mother's name" value={formData.motherName} onChange={e => update("motherName", e.target.value)} /></Field>
-                  <Field label="Date of Birth *"><input type="date" className={inputCls} value={formData.dob} onChange={e => update("dob", e.target.value)} /></Field>
-                  <Field label="Gender *">
-                    <select className={selectCls} value={formData.gender} onChange={e => update("gender", e.target.value)}>
+
+                  <Field label="Full Name">
+                    <input
+                      type="text"
+                      className={inputCls}
+                      placeholder="Enter full name"
+                      value={formData.firstName}
+                      maxLength={100}
+                      onChange={(e) =>
+                        update(
+                          "firstName",
+                          e.target.value.replace(/[^A-Za-z ]/g, "")
+                        )
+                      }
+                    />
+                  </Field>
+
+                  <Field label="Father's Name">
+                    <input
+                      type="text"
+                      className={inputCls}
+                      placeholder="Father's name"
+                      value={formData.fatherName}
+                      maxLength={100}
+                      onChange={(e) =>
+                        update(
+                          "fatherName",
+                          e.target.value.replace(/[^A-Za-z ]/g, "")
+                        )
+                      }
+                    />
+                  </Field>
+
+                  <Field label="Mother's Name">
+                    <input
+                      type="text"
+                      className={inputCls}
+                      placeholder="Mother's name"
+                      value={formData.motherName}
+                      maxLength={100}
+                      onChange={(e) =>
+                        update(
+                          "motherName",
+                          e.target.value.replace(/[^A-Za-z ]/g, "")
+                        )
+                      }
+                    />
+                  </Field>
+
+                  <Field label="Date of Birth">
+                    <input
+                      type="date"
+                      className={inputCls}
+                      value={formData.dob}
+                      max={
+                        new Date(
+                          new Date().setFullYear(
+                            new Date().getFullYear() - 14
+                          )
+                        )
+                          .toISOString()
+                          .split("T")[0]
+                      }
+                      onChange={(e) =>
+                        update("dob", e.target.value)
+                      }
+                    />
+                  </Field>
+
+                  <Field label="Gender">
+                    <select
+                      className={selectCls}
+                      value={formData.gender}
+                      onChange={(e) =>
+                        update("gender", e.target.value)
+                      }
+                    >
                       <option value="">Select Gender</option>
-                      {["Male","Female","Other"].map(g => <option key={g}>{g}</option>)}
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
                     </select>
                   </Field>
-                  <Field label="Email *"><input type="email" className={inputCls} placeholder="your@email.com" value={formData.email} onChange={e => update("email", e.target.value)} /></Field>
-                  <Field label="Address *" span2><textarea rows={3} className={`${inputCls} h-auto py-3`} placeholder="Complete address" value={formData.address} onChange={e => update("address", e.target.value)} /></Field>
-                  <Field label="District *">
-                    <select className={selectCls} value={formData.district} onChange={e => update("district", e.target.value)}>
-                      <option value="">Select District</option>
-                      {["Ranchi","Dhanbad","Bokaro","Jamshedpur","Giridih","Hazaribag","Deoghar","Dumka"].map(d => <option key={d}>{d}</option>)}
-                    </select>
+
+                  <Field label="Email">
+                    <input
+                      type="email"
+                      className={inputCls}
+                      placeholder="example@gmail.com"
+                      value={formData.email}
+                      maxLength={100}
+                      onChange={(e) =>
+                        update("email", e.target.value)
+                      }
+                    />
                   </Field>
+
+                  <Field label="Address" span2>
+                    <textarea
+                      rows={3}
+                      className={`${inputCls} h-auto py-3`}
+                      placeholder="Complete address"
+                      value={formData.address}
+                      maxLength={250}
+                      onChange={(e) =>
+                        update("address", e.target.value)
+                      }
+                    />
+                  </Field>
+
+                  <Field label="District">
+                    <input
+                      type="text"
+                      className={inputCls}
+                      placeholder="Enter district"
+                      value={formData.district}
+                      maxLength={50}
+                      onChange={(e) =>
+                        update(
+                          "district",
+                          e.target.value.replace(/[^A-Za-z ]/g, "")
+                        )
+                      }
+                    />
+                  </Field>
+
                   <Field label="State"><input className={`${inputCls} bg-slate-50 text-slate-400 cursor-not-allowed`} value="Jharkhand" disabled /></Field>
+
+
+                  {/* <Field label="State *">
+        <input
+          type="text"
+          className={inputCls}
+          placeholder="Enter state"
+          value={formData.state}
+          maxLength={50}
+          onChange={(e) =>
+            update(
+              "state",
+              e.target.value.replace(/[^A-Za-z ]/g, "")
+            )
+          }
+        />
+      </Field> */}
+
                 </div>
               </div>
             )}
@@ -196,18 +523,18 @@ export default function StudentRegistrationPage() {
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-6">Academic Details</h2>
                 <div className="grid grid-cols-2 gap-5">
-                  <Field label="Highest Qualification *">
+                  <Field label="Highest Qualification">
                     <select className={selectCls} value={formData.academicQualification} onChange={e => update("academicQualification", e.target.value)}>
                       <option value="">Select Qualification</option>
-                      {[["10th","10th Pass"],["12th","12th Pass"],["Diploma","Diploma"],["Graduation","Graduation"],["Post Graduation","Post Graduation"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                      {[["10th", "10th Pass"], ["12th", "12th Pass"], ["Diploma", "Diploma"], ["Graduation", "Graduation"], ["Post Graduation", "Post Graduation"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </Field>
-                  <Field label="School / College Name *"><input type="text" className={inputCls} placeholder="Institution name" value={formData.schoolCollegeName} onChange={e => update("schoolCollegeName", e.target.value)} /></Field>
-                  <Field label="Passing Year *"><input type="number" className={inputCls} placeholder="YYYY" value={formData.passingYear} onChange={e => update("passingYear", e.target.value)} /></Field>
-                  <Field label="Category *">
+                  <Field label="School / College Name"><input type="text" className={inputCls} placeholder="Institution name" value={formData.schoolCollegeName} onChange={e => update("schoolCollegeName", e.target.value)} /></Field>
+                  <Field label="Passing Year"><input type="number" className={inputCls} placeholder="YYYY" value={formData.passingYear} onChange={e => update("passingYear", e.target.value)} /></Field>
+                  <Field label="Category">
                     <select className={selectCls} value={formData.category} onChange={e => update("category", e.target.value)}>
                       <option value="">Select Category</option>
-                      {["General","OBC","SC","ST","EWS"].map(c => <option key={c}>{c}</option>)}
+                      {["General", "OBC", "SC", "ST", "EWS"].map(c => <option key={c}>{c}</option>)}
                     </select>
                   </Field>
                   <Field label="Previous Experience (If Any)" span2><textarea rows={3} className={`${inputCls} h-auto py-3`} placeholder="Describe any relevant experience" value={formData.experience} onChange={e => update("experience", e.target.value)} /></Field>
@@ -220,37 +547,73 @@ export default function StudentRegistrationPage() {
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-6">Enrollment Details</h2>
                 <div className="grid grid-cols-2 gap-5">
-                  <Field label="Select Course *">
-                    <select className={selectCls} value={formData.courseId} onChange={e => update("courseId", e.target.value)}>
+                  <Field label="Select Course">
+                    <select
+                      className={selectCls}
+                      value={formData.courseId}
+                      onChange={(e) => update("courseId", e.target.value)}
+                    >
                       <option value="">Choose Course</option>
-                      {[["computer-science","Computer Science"],["mathematics","Mathematics"],["english","English Language"],["science","Science"],["soft-skills","Soft Skills"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+
+                      {masterData.courses.map((course: any) => (
+                        <option
+                          key={course.id}
+                          value={course.id}
+                        >
+                          {course.name}
+                        </option>
+                      ))}
                     </select>
                   </Field>
-                  <Field label="Select Subject *">
-                    <select className={selectCls} value={formData.subjectId} onChange={e => update("subjectId", e.target.value)}>
+                  <Field label="Select Subject">
+                    <select
+                      className={selectCls}
+                      value={formData.subjectId}
+                      onChange={(e) => update("subjectId", e.target.value)}
+                    >
                       <option value="">Choose Subject</option>
-                      {[["programming","Programming"],["algebra","Algebra"],["physics","Physics"],["spoken-english","Spoken English"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+
+                      {masterData.subjects.map((subject: any) => (
+                        <option
+                          key={subject.id}
+                          value={subject.id}
+                        >
+                          {subject.name}
+                        </option>
+                      ))}
                     </select>
                   </Field>
-                  <Field label="Select Center *">
-                    <select className={selectCls} value={formData.centerId} onChange={e => update("centerId", e.target.value)}>
+                  <Field label="Select Center">
+                    <select
+                      className={selectCls}
+                      value={formData.centerId}
+                      onChange={(e) => update("centerId", e.target.value)}
+                    >
                       <option value="">Choose Center</option>
-                      {[["ranchi","Ranchi Center"],["jamshedpur","Jamshedpur Center"],["dhanbad","Dhanbad Center"],["bokaro","Bokaro Center"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+
+                      {masterData.centers.map((center: any) => (
+                        <option
+                          key={center.id}
+                          value={center.id}
+                        >
+                          {center.name}
+                        </option>
+                      ))}
                     </select>
                   </Field>
-                  <Field label="Select Batch *">
+                  <Field label="Select Batch">
                     <select className={selectCls} value={formData.batchId} onChange={e => update("batchId", e.target.value)}>
                       <option value="">Choose Batch</option>
-                      {[["morning","Morning Batch"],["afternoon","Afternoon Batch"],["evening","Evening Batch"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                      {[["morning", "Morning Batch"], ["afternoon", "Afternoon Batch"], ["evening", "Evening Batch"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </Field>
-                  <Field label="Learning Mode *">
+                  <Field label="Learning Mode">
                     <select className={selectCls} value={formData.learningMode} onChange={e => update("learningMode", e.target.value)}>
                       <option value="">Select Mode</option>
-                      {[["offline","Offline"],["online","Online"],["hybrid","Hybrid"]].map(([v,l]) => <option key={v} value={v}>{l}</option>)}
+                      {[["offline", "Offline"], ["online", "Online"], ["hybrid", "Hybrid"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </Field>
-                  <Field label="Preferred Timing *"><input type="text" className={inputCls} placeholder="e.g. 10 AM - 12 PM" value={formData.preferredTiming} onChange={e => update("preferredTiming", e.target.value)} /></Field>
+                  <Field label="Preferred Timing"><input type="text" className={inputCls} placeholder="e.g. 10 AM - 12 PM" value={formData.preferredTiming} onChange={e => update("preferredTiming", e.target.value)} /></Field>
                 </div>
               </div>
             )}
@@ -266,7 +629,7 @@ export default function StudentRegistrationPage() {
                     { label: "Aadhaar Card", key: "aadhaar", accept: ".pdf,image/*", icon: <FileText size={18} />, bg: "bg-orange-50 text-orange-500", hint: "PDF, JPG, PNG" },
                     { label: "Academic Certificate", key: "certificate", accept: ".pdf,image/*", icon: <FileText size={18} />, bg: "bg-green-50 text-green-600", hint: "PDF, JPG, PNG" },
                   ] as const).map(({ label, key, accept, icon, bg, hint }) => (
-                    <label key={key} className="flex items-center justify-between border-2 border-dashed border-slate-200 rounded-xl p-5 cursor-pointer hover:border-blue-400 hover:bg-blue-50/30 transition group">
+                    <label key={key} className="flex items-center justify-between border-2 border-dashed border-slate-200 rounded-xl p-5 cursor-pointer hover:border-green-600 hover:bg-green-50/30 transition group">
                       <input type="file" accept={accept} className="hidden" onChange={e => update(key, e.target.files?.[0] ?? null)} />
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bg}`}>{icon}</div>
@@ -276,7 +639,7 @@ export default function StudentRegistrationPage() {
                           {formData[key] && <p className="text-xs text-green-600 font-medium mt-1">checkmark {(formData[key] as File).name}</p>}
                         </div>
                       </div>
-                      <Upload size={18} className="text-slate-300 group-hover:text-blue-500 transition" />
+                      <Upload size={18} className="text-slate-300 group-hover:text-green-500 transition" />
                     </label>
                   ))}
                 </div>
@@ -288,13 +651,13 @@ export default function StudentRegistrationPage() {
               <div>
                 <h2 className="text-xl font-bold text-slate-900 mb-6">Review Details</h2>
                 <div className="grid gap-4 mb-5">
-                  <ReviewBlock title="Personal Information" color="blue" rows={[["Name",formData.firstName],["Email",formData.email],["Mobile",formData.mobile],["Date of Birth",formData.dob],["Gender",formData.gender],["District",formData.district]]} />
-                  <ReviewBlock title="Academic Information" color="indigo" rows={[["Qualification",formData.academicQualification],["Institution",formData.schoolCollegeName],["Passing Year",formData.passingYear],["Category",formData.category]]} />
-                  <ReviewBlock title="Enrollment Details" color="green" rows={[["Course",formData.courseId],["Subject",formData.subjectId],["Center",formData.centerId],["Batch",formData.batchId],["Mode",formData.learningMode]]} />
-                  <ReviewBlock title="Uploaded Documents" color="orange" rows={[["Photo",formData.photo?.name ?? "Not uploaded"],["Signature",formData.signature?.name ?? "Not uploaded"],["Aadhaar",formData.aadhaar?.name ?? "Not uploaded"],["Certificate",formData.certificate?.name ?? "Not uploaded"]]} />
+                  <ReviewBlock title="Personal Information" color="blue" rows={[["Name", formData.firstName], ["Email", formData.email], ["Mobile", formData.mobile], ["Date of Birth", formData.dob], ["Gender", formData.gender], ["District", formData.district]]} />
+                  <ReviewBlock title="Academic Information" color="indigo" rows={[["Qualification", formData.academicQualification], ["Institution", formData.schoolCollegeName], ["Passing Year", formData.passingYear], ["Category", formData.category]]} />
+                  <ReviewBlock title="Enrollment Details" color="green" rows={[["Course", formData.courseId], ["Subject", formData.subjectId], ["Center", formData.centerId], ["Batch", formData.batchId], ["Mode", formData.learningMode]]} />
+                  <ReviewBlock title="Uploaded Documents" color="orange" rows={[["Photo", formData.photo?.name ?? "Not uploaded"], ["Signature", formData.signature?.name ?? "Not uploaded"], ["Aadhaar", formData.aadhaar?.name ?? "Not uploaded"], ["Certificate", formData.certificate?.name ?? "Not uploaded"]]} />
                 </div>
                 <label className="flex items-start gap-3 bg-yellow-50 border border-yellow-200 rounded-xl p-4 cursor-pointer">
-                  <input type="checkbox" className="mt-0.5 accent-blue-700 w-4 h-4" checked={formData.declarationAccepted} onChange={e => update("declarationAccepted", e.target.checked)} />
+                  <input type="checkbox" className="mt-0.5 accent-green-700 w-4 h-4" checked={formData.declarationAccepted} onChange={e => update("declarationAccepted", e.target.checked)} />
                   <span className="text-sm text-slate-700 leading-relaxed">I hereby declare that all the information provided is correct and I agree to the terms and conditions of JSYC Platform.</span>
                 </label>
               </div>
@@ -307,32 +670,16 @@ export default function StudentRegistrationPage() {
                 <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 mb-6">
                   <h3 className="font-semibold text-slate-800 mb-4">Payment Summary</h3>
                   <div className="space-y-3 text-sm">
-                    {[["Course Fee","5,000"],["Registration Fee","500"]].map(([l,v]) => (
+                    {[["Course Fee", "100"]].map(([l, v]) => (
                       <div key={l} className="flex justify-between text-slate-600"><span>{l}</span><span>Rs. {v}</span></div>
                     ))}
                     <hr className="border-blue-200" />
                     <div className="flex justify-between font-bold text-base text-slate-900">
-                      <span>Total Amount</span><span className="text-blue-700">Rs. 5,500</span>
+                      <span>Total Amount</span><span className="text-green-700">Rs. 100</span>
                     </div>
                   </div>
                 </div>
-                <h3 className="font-semibold text-slate-800 mb-3">Select Payment Method</h3>
-                <div className="grid grid-cols-2 gap-3 mb-5">
-                  {[{label:"UPI",value:"upi",Icon:Wallet},{label:"Credit Card",value:"credit",Icon:CreditCard},{label:"Debit Card",value:"debit",Icon:CreditCard},{label:"Net Banking",value:"netbanking",Icon:Landmark}].map(({label,value,Icon}) => (
-                    <button key={value} type="button" onClick={() => update("paymentMethod", value)}
-                      className={`flex items-center gap-3 border-2 rounded-xl p-4 text-left transition ${formData.paymentMethod === value ? "border-blue-600 bg-blue-50" : "border-slate-200 hover:border-blue-300"}`}>
-                      <Icon size={22} className={formData.paymentMethod === value ? "text-blue-700" : "text-slate-400"} />
-                      <span className="text-sm font-semibold">{label}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-5 py-4">
-                  <BadgeIndianRupee size={20} className="text-green-600 shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-slate-800">Payment Status</p>
-                    <p className="text-xs text-slate-400">Pending Payment</p>
-                  </div>
-                </div>
+
               </div>
             )}
 
@@ -345,7 +692,7 @@ export default function StudentRegistrationPage() {
                 <h2 className="text-2xl font-bold text-green-700 mb-2">Enrollment Successful!</h2>
                 <p className="text-slate-500 mb-7">Your enrollment has been completed successfully.</p>
                 <div className="max-w-md mx-auto bg-blue-50 border border-blue-100 rounded-2xl overflow-hidden mb-7">
-                  {[["Enrollment ID",enrollmentId],["Transaction ID",formData.transactionId||""],["Course",formData.courseId],["Center",formData.centerId]].map(([k,v]) => (
+                  {[["Enrollment ID", enrollmentId], ["Transaction ID", formData.transactionId || ""], ["Course", formData.courseId], ["Center", formData.centerId]].map(([k, v]) => (
                     <div key={k} className="flex justify-between items-center px-5 py-3.5 border-b border-blue-100 last:border-0">
                       <span className="text-sm text-slate-500">{k}</span>
                       <span className="text-sm font-bold font-mono">{v}</span>
@@ -364,11 +711,25 @@ export default function StudentRegistrationPage() {
           {currentStep < 8 && (
             <div className="flex justify-between items-center px-8 py-5 border-t border-slate-100">
               <button onClick={prevStep} disabled={currentStep === 1}
-                className="px-7 py-2.5 text-sm font-semibold border border-slate-300 rounded-md text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">
+                className="px-7 py-2.5 cursor-pointer  text-sm font-semibold border border-slate-300 rounded-md text-slate-500 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 transition">
                 Previous
               </button>
-              <button onClick={nextStep}
-                className="px-8 py-2.5 text-sm font-semibold bg-blue-700 hover:bg-blue-800 text-white rounded-md transition">
+              <button
+                onClick={() => {
+
+                  if (currentStep === 7) {
+
+                    submitRegistration();
+
+                  } else {
+
+                    nextStep();
+
+                  }
+
+                }}
+                // onClick={nextStep}
+                className="px-8 py-2.5 cursor-pointer text-sm font-semibold bg-green-700 hover:bg-green-800 text-white rounded-md transition">
                 {currentStep === 7 ? "Pay & Confirm" : "Next"}
               </button>
             </div>

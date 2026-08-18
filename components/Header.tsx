@@ -474,7 +474,7 @@ export default function Header() {
       submenu: [
         { label: "News", href: "/news" },
         { label: "Image Gallery", href: "/gallery" },
-        { label: "Circular", href: "/circular" },
+        // { label: "Circular", href: "/circular" },
         { label: "Events", href: "/news" },
       ],
     },

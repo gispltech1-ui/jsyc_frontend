@@ -17,9 +17,9 @@ export default function Topbar() {
   }, []);
 
   const pageTitle =
-    user.role === "teacher"
+    user.role === "TEACHER"
       ? "Teacher Panel"
-      : user.role === "admin"
+      : user.role === "ADMIN"
       ? "Admin Dashboard"
       : "Student Dashboard";
 
@@ -38,11 +38,11 @@ export default function Topbar() {
         </h1>
 
         <p className="text-sm text-slate-500">
-          Welcome back, {user.name}
+          Welcome 
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      {/* <div className="flex items-center gap-3">
 
         <div className="text-right">
           <p className="text-sm font-medium text-slate-900">
@@ -58,7 +58,7 @@ export default function Topbar() {
           {initials}
         </div>
 
-      </div>
+      </div> */}
 
     </header>
   );

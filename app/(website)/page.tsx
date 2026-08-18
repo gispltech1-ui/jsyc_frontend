@@ -13,6 +13,7 @@ import HeroCentersSection from "@/components/HeroCenter";
 import CTASection from "@/components/CTASection";
 import GovernmentPartners from "@/components/Partner";
 import PageLoader from "@/components/PageLoader";
+import PayUTest from "@/components/Pay";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);

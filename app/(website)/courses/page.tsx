@@ -126,7 +126,7 @@ export default function CoursesPage() {
 
           <div className="text-center">
             <h2 className="text-2xl font-bold">
-              Featured Courses
+              Featured Courses 
             </h2>
 
             <p className="mt-4 text-xl text-slate-500">

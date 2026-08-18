@@ -1,3 +1,4 @@
+"use client"
 import CTASection from "@/components/CTASection";
 import DepartmentStructure from "@/components/Department";
 import NoticeBar from "@/components/StatsSection";
@@ -5,11 +6,12 @@ import { Calendar, Check, Clock, Star } from "lucide-react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import MediaGallery from "@/components/Media";
+import { useEffect, useState } from "react";
 
 const news = [
   {
     category: "Admission",
-    title: "New Enrollment Session Opens for 2026-27",
+    title: "New Enrollment Session Opens for 2026-27sd",
     date: "2026-05-25",
     time: "10:00 AM",
     description:
@@ -44,7 +46,32 @@ const categories = [
 ];
 
 export default function AboutPage() {
-  return (
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/admin/news`
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          setNews(result.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+    return (
     <main className="bg-[#E8DFC7]">
       <NoticeBar />
 
@@ -61,48 +88,61 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-[1fr_330px] gap-4">
 
             {/* Left Side */}
-            <div className="space-y-4">
+           <div className="space-y-4">
 
-              {news.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm"
-                >
-                  <div className="flex justify-between items-start mb-5">
+  {loading ? (
+    <div className="bg-white rounded-2xl p-6 text-center">
+      Loading news...
+    </div>
+  ) : news.length === 0 ? (
+    <div className="bg-white rounded-2xl p-6 text-center text-slate-500">
+      No news available.
+    </div>
+  ) : (
+    news.map((item) => (
+      <div
+        key={item.id}
+        className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm"
+      >
 
-                    <span className="bg-emerald-600 text-white text-xs px-3 py-1 rounded-md font-medium">
-                      {item.category}
-                    </span>
+        <div className="flex justify-between items-start mb-5">
 
-                    <div className="flex items-center gap-4 text-slate-500 text-sm">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        {item.date}
-                      </div>
+          <span className="bg-emerald-600 text-white text-xs px-3 py-1 rounded-md font-medium">
+            News
+          </span>
 
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        {item.time}
-                      </div>
-                    </div>
+          <div className="flex items-center gap-2 text-slate-500 text-sm">
+            <Calendar size={14} />
 
-                  </div>
+            {new Date(item.publishDate).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </div>
 
-                  <h2 className="text-2xl font-semibold text-slate-800 mb-4">
-                    {item.title}
-                  </h2>
+        </div>
 
-                  <p className="text-slate-500 leading-8 mb-6 text-sm">
-                    {item.description}
-                  </p>
 
-                  <button className="px-5 py-2 border rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium">
-                    Read More
-                  </button>
-                </div>
-              ))}
+        <h2 className="text-2xl font-semibold text-slate-800 mb-4">
+          {item.title}
+        </h2>
 
-            </div>
+
+        <p className="text-slate-500 leading-8 mb-6 text-sm">
+          {item.description}
+        </p>
+
+{/* 
+        <button className="px-5 py-2 border rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium">
+          Read More
+        </button> */}
+
+      </div>
+    ))
+  )}
+
+</div>
 
             {/* Right Sidebar */}
             <div className="space-y-4">

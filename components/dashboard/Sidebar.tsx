@@ -16,6 +16,7 @@ import {
   ClipboardList,
   Building2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const studentMenus = [
   {
@@ -154,17 +155,31 @@ const handleLogout = () => {
 };
 
   // TEMPORARY FOR UI
-  const role =
-    typeof window !== "undefined"
-      ? localStorage.getItem("role") || "student"
-      : "student";
+
+  const [role, setRole] = useState("");
+
+useEffect(() => {
+  const savedRole = localStorage.getItem("role");
+  setRole(savedRole || "student");
+}, []);
+
+  // const role =
+  //   typeof window !== "undefined"
+  //     ? localStorage.getItem("role") || "student"
+  //     : "student";
 
   const menus =
-    role === "teacher"
+    role === "TEACHER"
       ? teacherMenus
-      : role === "admin"
+      : role === "ADMIN"
       ? adminMenus
       : studentMenus;
+
+      if (!role) {
+  return (
+    <div className="w-[240px] bg-blue-700" />
+  );
+}
 
   return (
 <aside className="w-[240px] shrink-0 bg-blue-700 text-white flex flex-col">
