@@ -237,9 +237,9 @@ export default function StudentRegistrationPage() {
     const form = document.createElement("form");
 
     form.method = "POST";
-    form.action = process.env.NEXT_PUBLIC_PAYU_URL!;
+    // form.action = process.env.NEXT_PUBLIC_PAYU_URL!;
 
-    // form.action = "https://test.payu.in/_payment";
+    form.action = "https://test.payu.in/_payment";
 
     Object.entries(payuData).forEach(([key, value]) => {
 

@@ -12,7 +12,7 @@ const PayUTest = () => {
       setLoading(true);
 
       const { data } = await axios.post(
-        "http://localhost:4000/api/payment/initiate",
+         `${process.env.NEXT_PUBLIC_API_URL}/payment/initiate`,
         {
           transactionId,
         }
