@@ -48,7 +48,7 @@ export default function StudentRegistrationPage() {
   const [formData, setFormData] = useState({
     mobile: "", otp: "",
     firstName: "", fatherName: "", motherName: "",
-    gender: "", dob: "", email: "", address: "", district: "",
+    gender: "", dob: "", email: "", address: "", district: "",otherQualification:"",
     academicQualification: "", schoolCollegeName: "", passingYear: "", category: "", experience: "",
     courseId: "", subjectId: "", centerId: "", batchId: "", learningMode: "", preferredTiming: "",
     photo: null as File | null, signature: null as File | null,
@@ -524,11 +524,42 @@ export default function StudentRegistrationPage() {
                 <h2 className="text-xl font-bold text-slate-900 mb-6">Academic Details</h2>
                 <div className="grid grid-cols-2 gap-5">
                   <Field label="Highest Qualification">
+  <select
+    className={selectCls}
+    value={formData.academicQualification}
+    onChange={(e) =>
+      update("academicQualification", e.target.value)
+    }
+  >
+    <option value="">Select Qualification</option>
+    <option value="10th">10th Pass</option>
+    <option value="12th">12th Pass</option>
+    <option value="Diploma">Diploma</option>
+    <option value="Graduation">Graduation</option>
+    <option value="Post Graduation">Post Graduation</option>
+    <option value="Other">Other</option>
+  </select>
+</Field>
+
+{formData.academicQualification === "Other" && (
+  <Field label="Enter Qualification">
+    <input
+      type="text"
+      className={inputCls}
+      placeholder="Enter your highest qualification"
+      value={formData.otherQualification || ""}
+      onChange={(e) =>
+        update("otherQualification", e.target.value)
+      }
+    />
+  </Field>
+)}
+                  {/* <Field label="Highest Qualification">
                     <select className={selectCls} value={formData.academicQualification} onChange={e => update("academicQualification", e.target.value)}>
                       <option value="">Select Qualification</option>
                       {[["10th", "10th Pass"], ["12th", "12th Pass"], ["Diploma", "Diploma"], ["Graduation", "Graduation"], ["Post Graduation", "Post Graduation"]].map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
-                  </Field>
+                  </Field> */}
                   <Field label="School / College Name"><input type="text" className={inputCls} placeholder="Institution name" value={formData.schoolCollegeName} onChange={e => update("schoolCollegeName", e.target.value)} /></Field>
                   <Field label="Passing Year"><input type="number" className={inputCls} placeholder="YYYY" value={formData.passingYear} onChange={e => update("passingYear", e.target.value)} /></Field>
                   <Field label="Category">

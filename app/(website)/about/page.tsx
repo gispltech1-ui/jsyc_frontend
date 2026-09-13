@@ -17,9 +17,11 @@ export default function AboutPage() {
       />
 
       {/* Heading */}
-      <div className="p-8">
-        <h2 className=" text-4xl font-semibold text-black">
-          Our Story
+<div
+  id="introduction"
+  className="p-8 scroll-mt-32"
+>        <h2 className=" text-4xl font-semibold text-black">
+          Our Story 
         </h2>
 
         <p className="mt-3 text-base text-gray-700">
@@ -44,7 +46,10 @@ export default function AboutPage() {
       </div>
 
 
-        <div className="mx-8">
+        <div
+  id="mission-vision"
+  className="mx-8 scroll-mt-32"
+>
                    
               {/* Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-9">
@@ -374,8 +379,17 @@ Creating lasting positive change in the lives of our students
       </div>
         </div>
 
+<div
+  id="department-structure"
+  className="mx-8 scroll-mt-32"
+><DepartmentStructure />
+ </div>
 
-<DepartmentStructure />
+<div
+  id="administrative-desk"
+  className="mx-8 scroll-mt-32"
+></div>
+ 
 <CTASection />
 
 

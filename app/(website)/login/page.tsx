@@ -164,7 +164,7 @@ window.location.href =
         {/* Header */}
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold text-slate-900">
-            Welcome Back
+            Welcome Back 
           </h1>
 
           <p className="mt-2 text-md text-slate-500">
@@ -218,6 +218,13 @@ window.location.href =
             </button>
 
           </div>
+
+          <div className="mb-6 rounded-xl border border-[#b7d8c5] bg-[#f0f9f3] px-4 py-3">
+  <p className="text-sm text-[#005F2F] text-center leading-6">
+    <span className="font-semibold">Login Information:</span>{" "}
+    Please use your registered email address and mobile number for login.
+  </p>
+</div>
 
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-6">

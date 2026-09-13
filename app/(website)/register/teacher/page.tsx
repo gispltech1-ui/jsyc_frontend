@@ -147,6 +147,7 @@ export default function TeacherRegistrationPage() {
 
     // Professional Details
     highestQualification: "",
+    otherQualification: "",
     teachingExperience: "",
     expertiseSubjects: "",
     skills: "",
@@ -314,12 +315,132 @@ export default function TeacherRegistrationPage() {
   }, []);
 
   const nextStep = () => {
-    if (currentStep === 1) {
-      if (!formData.mobile.trim()) return alert("Enter mobile number");
-      // if (!formData.otp.trim()) return alert("Enter OTP");
+  // STEP 1 - Mobile Verification
+  if (currentStep === 1) {
+    const mobile = formData.mobile.trim();
+
+    if (!mobile) {
+      return alert("Please enter mobile number");
     }
-    setCurrentStep(p => Math.min(p + 1, steps.length));
-  };
+
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      return alert("Please enter a valid 10-digit mobile number");
+    }
+  }
+
+  // STEP 2 - Personal Details
+  if (currentStep === 2) {
+    if (!formData.fullName.trim()) {
+      return alert("Please enter full name");
+    }
+
+    if (!formData.dob) {
+      return alert("Please select date of birth");
+    }
+
+    if (!formData.gender) {
+      return alert("Please select gender");
+    }
+
+    if (!formData.email.trim()) {
+      return alert("Please enter email address");
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return alert("Please enter a valid email address");
+    }
+
+    if (!formData.address.trim()) {
+      return alert("Please enter complete address");
+    }
+  }
+
+  // STEP 3 - Professional Info
+  if (currentStep === 3) {
+    if (!formData.highestQualification) {
+      return alert("Please select highest qualification");
+    }
+
+    if (
+      formData.highestQualification === "Other" &&
+      !formData.otherQualification.trim()
+    ) {
+      return alert("Please enter your qualification");
+    }
+
+    if (!formData.teachingExperience.trim()) {
+      return alert("Please enter teaching experience");
+    }
+
+    const experience = Number(formData.teachingExperience);
+
+    if (isNaN(experience) || experience < 0) {
+      return alert("Please enter valid teaching experience");
+    }
+
+    if (!formData.expertiseSubjects.trim()) {
+      return alert("Please enter expertise subjects");
+    }
+
+    if (!formData.skills.trim()) {
+      return alert("Please enter your skills");
+    }
+
+    if (!formData.certifications.trim()) {
+      return alert("Please enter certifications");
+    }
+  }
+
+  // STEP 4 - Preferred Centers
+  if (currentStep === 4) {
+    if (!formData.preferredCenter1) {
+      return alert("Please select Preferred Center 1");
+    }
+
+    if (!formData.preferredCenter2) {
+      return alert("Please select Preferred Center 2");
+    }
+
+    if (!formData.subjectsCanTeach.trim()) {
+      return alert("Please enter subjects you can teach");
+    }
+
+    if (
+      formData.preferredCenter1 === formData.preferredCenter2
+    ) {
+      return alert("Preferred Center 1 and Preferred Center 2 must be different");
+    }
+  }
+
+  // STEP 5 - Documents
+  if (currentStep === 5) {
+    if (!formData.photo) {
+      return alert("Please upload your photo");
+    }
+
+    if (!formData.resumeCV) {
+      return alert("Please upload Resume/CV");
+    }
+
+    if (!formData.educationalCertificates) {
+      return alert("Please upload educational certificates");
+    }
+
+    if (!formData.idProof) {
+      return alert("Please upload ID proof");
+    }
+  }
+
+  setCurrentStep((p) => Math.min(p + 1, steps.length));
+};
+
+  // const nextStep = () => {
+  //   if (currentStep === 1) {
+  //     if (!formData.mobile.trim()) return alert("Enter mobile number");
+  //     // if (!formData.otp.trim()) return alert("Enter OTP");
+  //   }
+  //   setCurrentStep(p => Math.min(p + 1, steps.length));
+  // };
   const prevStep = () => setCurrentStep(p => Math.max(p - 1, 1));
   const saveDraft = () => { localStorage.setItem("teacher-registration", JSON.stringify({ currentStep, formData })); alert("Draft saved"); };
 
@@ -471,21 +592,39 @@ export default function TeacherRegistrationPage() {
                 <div className="grid grid-cols-2 gap-5">
 
                   <Field label="Highest Qualification">
-                    <select
-                      className={selectCls}
-                      value={formData.highestQualification}
-                      onChange={(e) =>
-                        update("highestQualification", e.target.value)
-                      }
-                    >
-                      <option>Select qualification</option>
-                      <option>B.Ed</option>
-                      <option>M.Ed</option>
-                      <option>Graduation</option>
-                      <option>Post Graduation</option>
-                      <option>PhD</option>
-                    </select>
-                  </Field>
+  <select
+    className={selectCls}
+    value={formData.highestQualification}
+    onChange={(e) => {
+      update("highestQualification", e.target.value);
+
+      // Clear custom qualification when user changes from Other
+      if (e.target.value !== "Other") {
+        update("otherQualification", "");
+      }
+    }}
+  >
+    <option value="">Select qualification</option>
+    <option value="B.Ed">B.Ed</option>
+    <option value="M.Ed">M.Ed</option>
+    <option value="Graduation">Graduation</option>
+    <option value="Post Graduation">Post Graduation</option>
+    <option value="PhD">PhD</option>
+    <option value="Other">Other</option>
+  </select>
+</Field>
+
+{formData.highestQualification === "Other" && (
+  <Field label="Enter Qualification">
+    <input
+      type="text"
+      className={inputCls}
+      placeholder="Enter your highest qualification"
+      value={formData.otherQualification}
+      onChange={(e) => update("otherQualification", e.target.value)}
+    />
+  </Field>
+)}
 
                   <Field label="Teaching Experience (years)">
                     <input

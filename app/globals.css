@@ -24,3 +24,21 @@ body {
   color: var(--foreground);
   font-family: var(--font-poppins);
 }
+
+.mobile-title {
+  display: block;
+}
+
+.desktop-title {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .mobile-title {
+    display: none;
+  }
+
+  .desktop-title {
+    display: block;
+  }
+}

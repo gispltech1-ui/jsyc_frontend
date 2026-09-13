@@ -38,9 +38,9 @@ export default function HomePage() {
       <CentersSection />
       <ImportantDesk />
       <Administratives />
-      <Courses />
-      <HeroCentersSection />
-      <CTASection />
+      {/* <Courses />
+      <HeroCentersSection /> */}
+      {/* <CTASection /> */}
       <GovernmentPartners />
     </>
   );
